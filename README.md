@@ -2,6 +2,9 @@
 
 [![CircleCI](https://dl.circleci.com/status-badge/img/gh/hden/labrador/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/hden/labrador/tree/main)
 
+[![Clojars Project](https://img.shields.io/clojars/v/com.github.hden/labrador.svg)](https://clojars.org/com.github.hden/labrador)
+
+
 A [dataloader](https://github.com/graphql/dataloader) library based on [Urania](https://github.com/funcool/urania). Batch data fetching across arbitrary Clojure data structures and resolve everything with a single `run!!`. Duplicate requests for the same id are automatically coalesced and fetched in batches.
 
 ## Why Labrador?
