@@ -5,10 +5,13 @@
             [labrador.impl.walker :refer [coerce]]))
 
 (defn fetch [{:keys [backend-fn]} ids env]
-  (p/then (p/promise (backend-fn env ids))
-          (fn [res]
-            (let [m (zipmap ids (repeat nil))]
-              (merge m res)))))
+  (let [res (try (backend-fn env ids)
+              (catch Throwable e
+                e))]
+    (p/then (p/promise res)
+            (fn [res]
+              (let [m (zipmap ids (repeat nil))]
+                (merge m res))))))
 
 (defn decorate
   [{:keys [decorate-fn]} node params]

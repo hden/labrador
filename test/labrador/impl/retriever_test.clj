@@ -18,8 +18,14 @@
          f (constantly {:a 1 :b 2})
          res (p/await (r/fetch {:backend-fn f} query :env))]
      (is (= {:a 1 :b 2 :c nil}
-            res)))))
-
+            res))))
+  
+  (testing "nil-returning backend"
+    (let [query #{:a :b :c}
+          f (constantly nil)
+          res (p/await (r/fetch {:backend-fn f} query :env))]
+      (is (= {:a nil :b nil :c nil}
+             res)))))
 
 (deftest decorate-test
   (let [f (fn [a b] (merge a b))
