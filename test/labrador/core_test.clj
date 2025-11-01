@@ -13,18 +13,25 @@
     (p/resolved res)))
 
 (core/defretriever golden
-  {:backend-fn backend})
+  [env ids]
+  (backend env ids))
 
 (core/defretriever labrador
-  {:backend-fn backend
-   :decorate-fn
+  {:decorate-fn
    (fn [value & params]
-     (assoc value :params params :friend (core/fetch :golden 1)))})
- 
+     (assoc value :params params :friend (core/fetch ::golden 1)))}
+  [env ids]
+  (backend env ids))
+
+(core/defretriever custom
+  {:tag :dog/custom}
+  [env ids]
+  (backend env ids))
+
 (deftest good-boi
   (testing "basic retriever"
     (let [env {:a :b}
-          root (core/fetch :golden 1 :params)]
+          root (core/fetch ::golden 1 :params)]
       (is (value? root))
       (is (= {:env env
               :ids #{1}}
@@ -36,7 +43,7 @@
   
   (testing "relational retriever"
     (let [env {:a :b}
-          root (core/fetch :labrador 2 :foo :bar :baz)]
+          root (core/fetch ::labrador 2 :foo :bar :baz)]
       (is (= {:env    env
               :ids    #{2}
               :params [:foo :bar :baz]
@@ -45,27 +52,29 @@
              (u/run!! (core/traverse root) {:env env}))))))
 
 (core/defretriever a
-  {:backend-fn
-   (fn [& _]
-     (throw (ex-info "oops" {})))})
+  [_ _]
+  (throw (ex-info "oops" {})))
 
 (core/defretriever b
-  {:backend-fn backend
-   :decorate-fn
+  {:decorate-fn
    (fn [& _]
-     (throw (ex-info "oops" {})))})
+     (throw (ex-info "oops" {})))}
+  [env ids]
+  (backend env ids))
 
 (core/defretriever c
-  {:backend-fn (constantly nil)})
+  [_ _]
+  nil)
 
 (core/defretriever d
-  {:backend-fn backend
-   :decorate-fn (constantly nil)})
+  {:decorate-fn (constantly nil)}
+  [env ids]
+  (backend env ids))
 
 (deftest naughty-tests
   (testing "throwing in backend-fn"
     (let [env {:a :b}
-          root (core/fetch :a 1)
+          root (core/fetch ::a 1)
           ex (atom nil)]
       (try
         (u/run!! (core/traverse root) {:env env})
@@ -75,7 +84,7 @@
   
   (testing "throwing in decorate-fn"
     (let [env {:a :b}
-          root (core/fetch :b 1)
+          root (core/fetch ::b 1)
           ex (atom nil)]
       (try
         (u/run!! (core/traverse root) {:env env})
@@ -86,12 +95,27 @@
 (deftest nil-punning-tests
   (testing "returning nil in backend-fn"
     (let [env {:a :b}
-          root (core/fetch :c 1)
+          root (core/fetch ::c 1)
           res (u/run!! (core/traverse root) {:env env})]
       (is (nil? res)))) 
 
   (testing "returning nil in decorate-fn"
     (let [env {:a :b}
-          root (core/fetch :d 1)
+          root (core/fetch ::d 1)
           res (u/run!! (core/traverse root) {:env env})]
       (is (nil? res)))))
+
+(deftest custom-tag-tests
+  (testing "custom tag dispatch works"
+    (let [env {:a :b}
+          root (core/fetch :dog/custom 9)]
+      (is (= {:env env
+              :ids #{9}}
+             (u/run!! (core/traverse root) {:env env})))))
+  (testing "custom tag registration replaces default"
+    (is (contains? (methods core/fetch) :dog/custom))
+    (is (not (contains? (methods core/fetch) ::custom)))))
+
+(deftest metadata-tests
+  (testing "default tag is namespace-qualified"
+    (is (contains? (methods core/fetch) ::golden))))

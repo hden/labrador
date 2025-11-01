@@ -1,4 +1,4 @@
-(defproject com.github.hden/labrador "0.1.0"
+(defproject com.github.hden/labrador "0.2.0"
   :description "A dataloader library based on Urania"
   :url "https://github.com/hden/labrador"
   :license {:name "EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0"
