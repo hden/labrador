@@ -27,20 +27,20 @@ A [dataloader](https://github.com/graphql/dataloader) library based on [Urania](
   "Accepts (env ids) and returns a promise or a plain map {id -> value}."
   {:tag         :user                      ; optional (default is ns-qualified for ::user)
    :decorate-fn (fn [x & more]             ; optional
-                  ;; You may embed further fetches; traverse resolves them too.
-                  (assoc x :more more :friend (lab/fetch :user 1)))}
+                  ;; You could embed further fetches here; traverse would resolve them too.
+                  (assoc x :more more))}
   [env ids]
   (p/presolved
     (into {} (map (fn [id] [id {:env env :id id}])) ids)))
 
-;; 3) Fetch one value (returns an async value)
+;; 2) Fetch one value (returns an async value)
 (def user-42 (lab/fetch :user 42 :foo :bar))
 
-;; 4) Resolve once (all coalesced and batched)
+;; 3) Resolve once (all coalesced and batched)
 (u/run!! user-42 {:env {:locale "ja"}})
 ;; => {:env {:locale "ja"}, :id 42, :more (:foo :bar)}
 
-;; 5) Traverse arbitrary structures (keys are traversed too)
+;; 4) Traverse arbitrary structures (keys are traversed too)
 (u/run!! (lab/traverse
           {:k (lab/fetch :user 2)
            (lab/fetch :user 3) [:a (lab/fetch :user 4)]})
@@ -69,7 +69,7 @@ A [dataloader](https://github.com/graphql/dataloader) library based on [Urania](
 
 What it generates:
 
-* A record `name` representing a batchable fetch unit.
+* A record `name-retriever` representing a batchable fetch unit.
 * A `lab/fetch` multimethod entry so you can call `(lab/fetch :tag id & more)`
   (omit `:tag` and use the auto-resolved `(lab/fetch ::name id & more)`).
 
