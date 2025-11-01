@@ -56,7 +56,9 @@ Temporary Items
 /logs
 .cpcache
 .lsp
-.clj-kondo
+.clj-kondo/*
+!.clj-kondo/config.edn
+!.clj-kondo/hooks/
 .nrepl-port
 .rebel_readline_history
 .vscode

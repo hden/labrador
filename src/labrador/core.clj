@@ -24,7 +24,7 @@
    `(fetch ::name ...)` when you skip `:tag`)."
   {:arglists '([name doc-string? attr-map? [params*] prepost-map? body]
                [name doc-string? attr-map? ([params*] prepost-map? body) + attr-map?])
-   :clj-kondo/ignore  [:unresolved-symbol]}
+   :clj-kondo/lint-as 'clojure.core/defn}
   [sym & fdecl]
   (let [docstring   (when (string? (first fdecl)) (first fdecl))
         fdecl*      (if docstring (next fdecl) fdecl)
